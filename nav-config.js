@@ -12,6 +12,7 @@ const navConfig = {
 		{ name: '个体', url: 'pokemon_chinese.html', icon: '⚔️' },
         { name: '特性', url: 'ability.html', icon: '📄' },
 		{ name: '名字', url: 'name.html', icon: '🔤' },
+		{ name: '构造', url: 'tectonic.html', icon: '🧮' },
     ],
     settings: {
         hoverEffect: true,
