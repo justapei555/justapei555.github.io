@@ -16016,26 +16016,39 @@
     });
 
     // 复合筛选逻辑
-    function filterPokemon() {
-        const type1 = document.getElementById('filter-type1').value.toLowerCase();
-        const type2 = document.getElementById('filter-type2').value.toLowerCase();
-        const nameFilter = document.getElementById('filter-pkmn-name').value.toLowerCase();
+	function filterPokemon() {
+		const type1 = document.getElementById('filter-type1').value.toLowerCase();
+		const type2 = document.getElementById('filter-type2').value.toLowerCase();
+		const nameFilter = document.getElementById('filter-pkmn-name').value.toLowerCase();
 
-        document.querySelectorAll('#pokedex tbody tr').forEach(row => {
-            // 名称筛选
-            const name = row.querySelector('.cell-name').textContent.toLowerCase();
-            const nameMatch = name.includes(nameFilter);
-            
-            // 属性筛选
-            const types = [...row.querySelectorAll('.type-icon')]
-                .map(el => el.textContent.toLowerCase());
-            const typeMatch = 
-                (!type1 || types.includes(type1)) && 
-                (!type2 || types.includes(type2));
+		document.querySelectorAll('#pokedex tbody tr').forEach(row => {
+			const nameCell = row.querySelector('.cell-name a');
 
-            row.style.display = (nameMatch && typeMatch) ? '' : 'none';
-        });
-    }
+			// ✅ 中文名
+			const chineseName = nameCell.textContent.toLowerCase();
+
+			// ✅ 从 title 属性提取英文名
+			const title = nameCell.getAttribute('title') || '';
+			// 例如 "View Pokedex for #0332 Cacturne" -> "Cacturne"
+			const match = title.match(/#\d+\s+([A-Za-z\-]+)/);
+			const englishName = match ? match[1].toLowerCase() : '';
+
+			// ✅ 名称匹配（支持中英文）
+			const nameMatch = 
+				!nameFilter || 
+				chineseName.includes(nameFilter) || 
+				englishName.includes(nameFilter);
+
+			// 属性筛选
+			const types = [...row.querySelectorAll('.type-icon')]
+				.map(el => el.textContent.toLowerCase());
+			const typeMatch = 
+				(!type1 || types.includes(type1)) && 
+				(!type2 || types.includes(type2));
+
+			row.style.display = (nameMatch && typeMatch) ? '' : 'none';
+		});
+	}
 
     // 初始化类型选项（避免重复代码）
     function initTypeOptions() {
