@@ -13,6 +13,7 @@ const navConfig = {
         { name: '特性', url: 'ability.html', icon: '📄' },
 		{ name: '名字', url: 'name.html', icon: '🔤' },
 		{ name: '构造', url: 'tectonic.html', icon: '🧮' },
+		{ name: '魂石', url: 'soulstones.html', icon: '🗃️' },
     ],
     settings: {
         hoverEffect: true,
