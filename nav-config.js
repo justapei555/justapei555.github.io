@@ -14,6 +14,8 @@ const navConfig = {
 		{ name: '名字', url: 'name.html', icon: '🔤' },
 		{ name: '构造', url: 'tectonic.html', icon: '🧮' },
 		{ name: '魂石', url: 'soulstones.html', icon: '🗃️' },
+		{ name: '奥德赛', url: 'odyssey.html', icon: '🏆️' },
+		{ name: '游戏！', url: 'game', icon: '🎮️' },
     ],
     settings: {
         hoverEffect: true,
