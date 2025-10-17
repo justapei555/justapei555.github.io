@@ -35,7 +35,7 @@
         }
 
         .main-content {
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 0 auto;
         }
 		h1 {
@@ -134,6 +134,44 @@
             vertical-align: middle;
             margin-right: 10px;
         }
+		
+		thead {
+		  position: sticky;
+		  top: 0;
+		  background-color: white; /* 防止文字透明或与表格内容重叠 */
+		  z-index: 10; /* 确保浮在表格行上方 */
+		}
+		
+		#backToTop {
+		  position: fixed;
+		  left: calc((100% - 1000px) / 2 - 60px); /* 计算在主内容左侧显示 */
+		  top: 50%;
+		  transform: translateY(-50%);
+		  width: 40px;
+		  height: 40px;
+		  line-height: 40px;
+		  text-align: center;
+		  background-color: #4a90e2;
+		  color: white;
+		  border-radius: 50%;
+		  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+		  cursor: pointer;
+		  opacity: 0;
+		  transition: opacity 0.3s, background-color 0.3s;
+		  z-index: 999;
+		}
+
+		/* 鼠标悬停效果 */
+		#backToTop:hover {
+		  background-color: #357ab8;
+		}
+
+		/* 页面宽度不足时隐藏按钮 */
+		@media (max-width: 1120px) {
+		  #backToTop {
+			display: none;
+		  }
+		}
     </style>
 </head>
 <body>
@@ -190,6 +228,19 @@
 <option value="dark">Dark</option>
 <option value="steel">Steel</option>
 <option value="fairy">Fairy</option>
+</select>
+<span>世代：</span>
+<select class="type-select" id="filter-generation">
+<option value="">任意</option>
+<option value="1">第一世代</option>
+<option value="2">第二世代</option>
+<option value="3">第三世代</option>
+<option value="4">第四世代</option>
+<option value="5">第五世代</option>
+<option value="6">第六世代</option>
+<option value="7">第七世代</option>
+<option value="8">第八世代</option>
+<option value="9">第九世代</option>
 </select>
 </div>
 </div>
@@ -16001,6 +16052,7 @@
 </div>
 </div>
 </div>
+<div id="backToTop" title="回到顶部">▲</div>
 </main>
 <script>
 
@@ -16014,45 +16066,64 @@
     document.querySelectorAll('.type-select').forEach(select => {
         select.addEventListener('change', filterPokemon);
     });
+	
+	document.getElementById('filter-generation').addEventListener('change', filterPokemon);
 
     // 复合筛选逻辑
 	function filterPokemon() {
-    const type1 = document.getElementById('filter-type1').value.toLowerCase();
-    const type2 = document.getElementById('filter-type2').value.toLowerCase();
-    const nameFilter = document.getElementById('filter-pkmn-name').value.toLowerCase().trim();
+		const type1 = document.getElementById('filter-type1').value.toLowerCase();
+		const type2 = document.getElementById('filter-type2').value.toLowerCase();
+		const nameFilter = document.getElementById('filter-pkmn-name').value.toLowerCase().trim();
+		const generation = document.getElementById('filter-generation').value; // ✅ 获取世代选项
 
-    document.querySelectorAll('#pokedex tbody tr').forEach(row => {
-        const nameCell = row.querySelector('.cell-name a');
-        const numCell = row.querySelector('.cell-num');
+		document.querySelectorAll('#pokedex tbody tr').forEach(row => {
+			const nameCell = row.querySelector('.cell-name a');
+			const numCell = row.querySelector('.cell-num');
 
-        // ✅ 中文名
-        const chineseName = nameCell?.textContent.toLowerCase() || '';
+			const chineseName = nameCell?.textContent.toLowerCase() || '';
+			const title = nameCell?.getAttribute('title') || '';
+			const match = title.match(/#\d+\s+([A-Za-z'’\-.♀♂]+)/);
+			const englishName = match ? match[1].toLowerCase() : '';
+			const number = numCell?.getAttribute('data-sort-value') || '';
 
-        // ✅ 英文名（从 title 提取）
-        const title = nameCell?.getAttribute('title') || '';
-        const match = title.match(/#\d+\s+([A-Za-z'’\-.♀♂]+)/); // 支持特殊字符
-        const englishName = match ? match[1].toLowerCase() : '';
+			const num = parseInt(number, 10);
 
-        // ✅ 编号（从 data-sort-value 获取）
-        const number = numCell?.getAttribute('data-sort-value') || '';
+			// ✅ 名称/编号筛选
+			const nameMatch =
+				!nameFilter ||
+				chineseName.includes(nameFilter) ||
+				englishName.includes(nameFilter) ||
+				number.includes(nameFilter.replace(/^0+/, ''));
 
-        // ✅ 名称/编号匹配
-        const nameMatch = 
-            !nameFilter ||
-            chineseName.includes(nameFilter) ||
-            englishName.includes(nameFilter) ||
-            number.includes(nameFilter.replace(/^0+/, '')); // 忽略前导零
+			// ✅ 属性筛选
+			const types = [...row.querySelectorAll('.type-icon')].map(el => el.textContent.toLowerCase());
+			const typeMatch =
+				(!type1 || types.includes(type1)) &&
+				(!type2 || types.includes(type2));
 
-        // 属性筛选
-        const types = [...row.querySelectorAll('.type-icon')]
-            .map(el => el.textContent.toLowerCase());
-        const typeMatch = 
-            (!type1 || types.includes(type1)) && 
-            (!type2 || types.includes(type2));
+			// ✅ 世代筛选
+			const genRanges = {
+				1: [0, 151],
+				2: [152, 251],
+				3: [252, 386],
+				4: [387, 494],
+				5: [495, 649],
+				6: [650, 721],
+				7: [722, 809],
+				8: [810, 905],
+				9: [906, 1025],
+			};
 
-        row.style.display = (nameMatch && typeMatch) ? '' : 'none';
-    });
-}
+			let genMatch = true;
+			if (generation && genRanges[generation]) {
+				const [min, max] = genRanges[generation];
+				genMatch = num >= min && num <= max;
+			}
+
+			// ✅ 最终显示判断
+			row.style.display = (nameMatch && typeMatch && genMatch) ? '' : 'none';
+		});
+	}
 
     // 初始化类型选项（避免重复代码）
     function initTypeOptions() {
@@ -16069,7 +16140,7 @@
             });
         });
     }
-    initTypeOptions();
+    //initTypeOptions();
 
 
 
@@ -16096,6 +16167,22 @@
             rows.forEach(row => tbody.appendChild(row));
         });
     });
+	
+	
+	//回顶部
+	const backToTop = document.getElementById("backToTop");
+
+	window.addEventListener("scroll", () => {
+	  if (window.scrollY > 300) {
+		backToTop.style.opacity = "1";
+	  } else {
+		backToTop.style.opacity = "0";
+	  }
+	});
+
+	backToTop.addEventListener("click", () => {
+	  window.scrollTo({ top: 0, behavior: "smooth" });
+	});
 </script>
 </body>
 </html>
