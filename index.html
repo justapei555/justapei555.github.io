@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>宝可梦属性工具</title>
 	<!-- 只需这3行 -->
-	<link rel="stylesheet" href="nav.css">
 	<link rel="icon" type="image/svg+xml" href="favicon.svg">
 	<script src="nav-config.js?v=3"></script>
 	<script src="nav.js"></script>
+	<link rel="stylesheet" href="nav.css">
 
     <style>
         /* 整体样式 */
@@ -416,7 +416,54 @@
                 html += '</tr>';
             });
             table.innerHTML = html;
+			enableRowAndColumnHighlight();
         }
+		
+		function enableRowAndColumnHighlight() {
+			const table = document.getElementById('typeChart');
+			const rows = table.querySelectorAll('tr');
+
+			table.addEventListener('mouseover', (e) => {
+				const cell = e.target.closest('td');
+				if (!cell) return;
+
+				// 清除旧的高亮
+				table.querySelectorAll('.highlight-overlay').forEach(el => el.remove());
+
+				const colIndex = cell.cellIndex;
+				const rowIndex = cell.parentElement.rowIndex; // 0 是表头
+
+				// 创建一个半透明遮罩函数
+				const makeOverlay = (target) => {
+					const overlay = document.createElement('div');
+					overlay.className = 'highlight-overlay';
+					overlay.style.position = 'absolute';
+					overlay.style.inset = '0';
+					overlay.style.background = 'rgba(160, 220, 255, 0.25)'; // 浅蓝透明层
+					overlay.style.pointerEvents = 'none';
+					target.style.position = 'relative';
+					target.appendChild(overlay);
+				};
+
+				// 高亮行（跳过表头）
+				if (rowIndex > 0) {
+					const cells = cell.parentElement.querySelectorAll('td');
+					cells.forEach(td => makeOverlay(td));
+				}
+
+				// 高亮列（跳过表头）
+				rows.forEach((r, i) => {
+					if (i === 0) return; // 跳过标题行
+					const c = r.children[colIndex];
+					if (c && c.tagName === 'TD') makeOverlay(c);
+				});
+			});
+
+			// 鼠标移出时清除所有遮罩
+			table.addEventListener('mouseout', () => {
+				table.querySelectorAll('.highlight-overlay').forEach(el => el.remove());
+			});
+		}
 
         // 模块2：防御倍率计算
         function initDefenseModule() {
