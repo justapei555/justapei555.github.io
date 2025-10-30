@@ -1,0 +1,11 @@
+<!--?xml version="1.0" encoding="utf-8"?-->
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Poké-style ball">
+  <!-- 外圈 -->
+  <circle cx="32" cy="32" r="30" fill="#d33"></circle>
+  <!-- 下半白色覆盖 -->
+  <rect x="2" y="32" width="60" height="30" fill="#fff"></rect>
+  <!-- 中间黑色横条（带厚度） -->
+  <rect x="2" y="28" width="60" height="8" fill="#000"></rect>
+  <!-- 中心白圆边框 -->
+  <circle cx="32" cy="32" r="10" fill="#fff" stroke="#000" stroke-width="4"></circle>
+</svg>
